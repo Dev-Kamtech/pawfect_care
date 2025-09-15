@@ -1,0 +1,9 @@
+storeFile=/absolute/path/to/your/keystore.jks
+storePassword=your-store-password
+keyAlias=your-key-alias
+keyPassword=your-key-password
+
+# Usage:
+# 1) Copy this file to android/key.properties
+# 2) Replace the values above with your keystore details
+# 3) Build release: flutter build apk --release
