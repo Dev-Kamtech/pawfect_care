@@ -85,11 +85,11 @@ class StoreScreen extends StatelessWidget {
   Widget _grid(BuildContext context, List<Map<String, String>> items) {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 220,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 0.72,
+        childAspectRatio: 0.66,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -108,32 +108,19 @@ class StoreScreen extends StatelessWidget {
               ),
             );
           },
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
-                BoxShadow(color: Color(0x11000000), blurRadius: 6),
-              ],
-            ),
+          child: Card(
+            elevation: 3,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            clipBehavior: Clip.antiAlias,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Top image without ClipRRect; use decoration to avoid overflow
-                Container(
-                  height: 120,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEFF3F6),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                    image: DecorationImage(
-                      image: NetworkImage(p["image"]!),
-                      fit: BoxFit.cover,
-                      onError: (_, __) {},
-                    ),
+                // Flexible image takes remaining space to avoid overflow
+                Expanded(
+                  child: Image.network(
+                    p["image"]!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(color: const Color(0xFFEFF3F6)),
                   ),
                 ),
                 Padding(
@@ -155,9 +142,9 @@ class StoreScreen extends StatelessWidget {
                     style: const TextStyle(color: Colors.black54),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(height: 8),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                   child: SizedBox(
                     height: 36,
                     width: double.infinity,
