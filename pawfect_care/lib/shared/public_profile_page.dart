@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
 import 'package:pawfect_care/db_helper.dart';
 import 'package:pawfect_care/session.dart';
 import 'package:pawfect_care/theme/theme.dart';
@@ -30,6 +32,24 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
     });
   }
 
+  Future<void> _pickAvatar() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? file = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (file == null) return;
+      final bytes = await file.readAsBytes();
+      final id = Session.currentUserId ?? 0;
+      if (id == 0) return;
+      await DBHelper.updateUserPhotoBytes(id, bytes);
+      await _load();
+    } catch (_) {
+      // ignore picker errors
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -58,29 +78,33 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
         children: [
           const SizedBox(height: 8),
           Center(
-            child: Stack(
-              children: [
-                const CircleAvatar(
-                  radius: 60,
-                  backgroundImage: NetworkImage(
-                    // simple placeholder avatar
-                    "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
+            child: GestureDetector(
+              onTap: _pickAvatar,
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundImage: (user != null && user!['photo_bytes'] != null)
+                        ? MemoryImage(user!['photo_bytes'] as Uint8List)
+                        : const NetworkImage(
+                            "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
+                          ) as ImageProvider,
                   ),
-                ),
-                Positioned(
-                  right: 0,
-                  bottom: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(22),
-                      boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 6)],
+                  Positioned(
+                    right: 0,
+                    bottom: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
+                        boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 6)],
+                      ),
+                      child: Text(tag, style: const TextStyle(fontWeight: FontWeight.w700)),
                     ),
-                    child: Text(tag, style: const TextStyle(fontWeight: FontWeight.w700)),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),

@@ -56,7 +56,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> _save() async {
     final id = Session.currentUserId ?? 0;
-    // beginner-simple update
+    // Map internal role codes to app-wide labels
+    String? _roleLabel(String? codeOrLabel) {
+      if (codeOrLabel == null) return null;
+      final v = codeOrLabel.trim().toLowerCase();
+      if (v == 'pet_owner' || v.contains('owner') || v.contains('pet')) return 'Pet Owner';
+      if (v == 'vet' || v.contains('vet')) return 'Veterinarian';
+      if (v == 'shelter' || v.contains('shelter')) return 'Shelter Admin';
+      return null;
+    }
+
+    final newRoleLabel = _roleLabel(role) ?? _roleLabel(widget.startRole) ?? widget.startRole;
+
     final db = await DBHelper.getDb();
     await db.update(
       'users',
@@ -64,13 +75,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'name': name.text,
         'email': email.text.trim().toLowerCase(),
         'phone': phone.text,
-        'role': role,
+        'role': newRoleLabel,
       },
       where: 'id=?',
       whereArgs: [id],
     );
+
+    // Update session and route to the correct dashboard, replacing the stack
+    Session.currentRole = newRoleLabel;
     if (!mounted) return;
-    Navigator.pop(context, true);
+    String route = '/login';
+    if (newRoleLabel == 'Pet Owner') {
+      route = '/owner';
+    } else if (newRoleLabel == 'Veterinarian') {
+      route = '/vet';
+    } else if (newRoleLabel == 'Shelter Admin') {
+      route = '/shelter';
+    }
+    Navigator.pushNamedAndRemoveUntil(context, route, (r) => false);
   }
 
   InputDecoration _d(String h) => InputDecoration(

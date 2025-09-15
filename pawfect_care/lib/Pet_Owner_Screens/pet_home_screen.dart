@@ -3,9 +3,26 @@ import 'package:shimmer/shimmer.dart';
 import 'package:pawfect_care/Pet_Owner_Screens/pets_screen.dart';
 import 'package:pawfect_care/theme/theme.dart';
 import 'package:pawfect_care/widgets/dashboard_card.dart';
+import 'package:pawfect_care/db_helper.dart';
+import 'package:pawfect_care/session.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Future<Map<String, dynamic>?>? _userFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    final id = Session.currentUserId ?? 0;
+    _userFuture = DBHelper.getUser(id);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,22 +53,28 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  "PawfectCare",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  "Hello, Sarah!",
-                  style: TextStyle(color: Colors.black54, fontSize: 14),
-                ),
-              ],
+            FutureBuilder<Map<String, dynamic>?>(
+              future: _userFuture,
+              builder: (context, snapshot) {
+                final name = (snapshot.data?['name'] ?? '').toString();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "PawfectCare",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      name.isNotEmpty ? "Hello, $name!" : "Hello!",
+                      style: const TextStyle(color: Colors.black54, fontSize: 14),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -125,7 +148,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
-                const SizedBox(height: 25),
+            const SizedBox(height: 25),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:pawfect_care/theme/theme.dart';
 import 'package:pawfect_care/Pet_Owner_Screens/product_detail_dummy.dart';
 
@@ -84,12 +83,17 @@ class StoreScreen extends StatelessWidget {
   }
 
   Widget _grid(BuildContext context, List<Map<String, String>> items) {
-    return GridView.count(
-      crossAxisCount: 2,
+    return GridView.builder(
       padding: const EdgeInsets.all(16),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      children: items.map((p) {
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.72,
+      ),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final p = items[index];
         return GestureDetector(
           onTap: () {
             Navigator.push(
@@ -109,48 +113,47 @@ class StoreScreen extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: const [
-                BoxShadow(color: Color(0x11000000), blurRadius: 6)
+                BoxShadow(color: Color(0x11000000), blurRadius: 6),
               ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                  child: AspectRatio(
-                    aspectRatio: 1.1,
-                    child: Image.network(
-                      p["image"]!,
+                // Top image without ClipRRect; use decoration to avoid overflow
+                Container(
+                  height: 120,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF3F6),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    image: DecorationImage(
+                      image: NetworkImage(p["image"]!),
                       fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Shimmer.fromColors(
-                          baseColor: const Color(0xFFE0E0E0),
-                          highlightColor: const Color(0xFFF5F5F5),
-                          child: Container(color: const Color(0xFFE0E0E0)),
-                        );
-                      },
-                      errorBuilder: (_, __, ___) => Container(color: const Color(0xFFEFF3F6)),
+                      onError: (_, __) {},
                     ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
                   child: Text(
-                    p["title"]!.length > 18
-                        ? "${p["title"]!.substring(0, 18)}..."
-                        : p["title"]!,
+                    p["title"] ?? '',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 16),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15.5,
+                    ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
-                  child: Text(p["price"]!,
-                      style: const TextStyle(color: Colors.black54)),
+                  child: Text(
+                    p["price"] ?? '',
+                    style: const TextStyle(color: Colors.black54),
+                  ),
                 ),
                 const Spacer(),
                 Padding(
@@ -163,13 +166,17 @@ class StoreScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: blueButtonColor,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         elevation: 0,
                       ),
-                      child: const Text("Buy",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        "Buy",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -177,7 +184,7 @@ class StoreScreen extends StatelessWidget {
             ),
           ),
         );
-      }).toList(),
+      },
     );
   }
 }

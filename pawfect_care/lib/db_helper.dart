@@ -61,7 +61,7 @@ class DBHelper {
 
     _db = await openDatabase(
       path,
-      version: 2, // <-- bump this (from 1 to 2)
+      version: 3, // <-- bump this (from 1 to 2)
       onCreate: (db, v) async {
         await _createTables(db);
       },
@@ -137,6 +137,25 @@ class DBHelper {
     await db.update(
       'users',
       {'password': newPassword},
+      where: 'id=?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<void> updateUserPhotoBytes(int id, List<int> bytes) async {
+    final db = await getDb();
+    // Ensure column exists (idempotent)
+    try {
+      final cols = await db.rawQuery('PRAGMA table_info(users)');
+      final hasPhoto = cols.any((c) => (c['name'] as String?) == 'photo_bytes');
+      if (!hasPhoto) {
+        await db.execute('ALTER TABLE users ADD COLUMN photo_bytes BLOB');
+      }
+    } catch (_) {}
+
+    await db.update(
+      'users',
+      {'photo_bytes': bytes},
       where: 'id=?',
       whereArgs: [id],
     );

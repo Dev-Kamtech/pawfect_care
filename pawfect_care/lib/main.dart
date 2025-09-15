@@ -7,6 +7,7 @@ import 'package:pawfect_care/Authentication/role_selection_page.dart';
 import 'package:pawfect_care/Pet_Owner_Screens/pet_owner_dashboard.dart';
 import 'package:pawfect_care/Shelter_screens/shelter_dashboard.dart';
 import 'package:pawfect_care/Vet_screens/vet_main.dart';
+import 'package:pawfect_care/Authentication/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,8 +19,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/signup',
+      initialRoute: '/',
       routes: {
+        '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
         '/forgot': (context) => const ResetPasswordEmailPage(),
